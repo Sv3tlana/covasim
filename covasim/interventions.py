@@ -279,44 +279,29 @@ class contact_tracing(Intervention):
     '''
     Contact tracing of positives
     '''
-<<<<<<< HEAD
-    def __init__(self, trace_probs, trace_time, contact_reduction=None):
-        super().__init__()
-        self.trace_probs = trace_probs
-        self.trace_time = trace_time
-        self.contact_reduction = contact_reduction # Not using this yet, but could potentially scale contact in this intervention
-        return
-
-    def apply(self, sim: cv.Sim):
-        t = sim.t
-
-        # Firstly, loop over diagnosed people to trace their contacts
-        diagnosed_ppl = filter(lambda p: p.diagnosed, sim.people.values())
-        for i, person in enumerate(diagnosed_ppl):
-=======
-    def __init__(self, trace_probs, trace_time, start_day=0):
+    def __init__(self, trace_probs, trace_time, start_day=0, contact_reduction=None):
         super().__init__()
         self.trace_probs = trace_probs
         self.trace_time = trace_time
         self.start_day = start_day
+        self.contact_reduction = contact_reduction # Not using this yet, but could potentially scale contact in this intervention
         return
-
 
     def apply(self, sim):
         t = sim.t
         if t < self.start_day:
             return
 
+        # Loop over diagnosed people to trace their contacts
         for person in sim.people:
-            if not person.infectious:
+            if not person.diagnosed:
                 continue
->>>>>>> develop
 
             # Trace dynamic contact, e.g. the ones that change on every step
             # A sample of community contacts is appended to person.dyn_cont_ppl on each step
             person.trace_dynamic_contacts(self.trace_probs, self.trace_time)
 
-            if person.date_diagnosed is not None and person.date_diagnosed == t-1:
+            if person.date_diagnosed == t-1:
                 # This person was just diagnosed: time to trace their (static) contacts
                 contactable_ppl = person.trace_static_contacts(self.trace_probs, self.trace_time)
                 contactable_ppl.update(person.dyn_cont_ppl)
