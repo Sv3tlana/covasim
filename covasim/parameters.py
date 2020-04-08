@@ -34,24 +34,6 @@ def make_pars(set_prognoses=False, prog_by_age=True, use_layers=False, **kwargs)
     pars['n_days']     = 60 # Number of days of run, if end_day isn't used
     pars['rand_seed']  = 1 # Random seed, if None, don't reset
     pars['verbose']    = 1 # Whether or not to display information during the run -- options are 0 (silent), 1 (default), 2 (everything)
-<<<<<<< HEAD
-    pars['usepopdata'] = 'random' # Whether or not to load actual population data
-    pars['timelimit']  = 3600 # Time limit for a simulation (seconds)
-    pars['stop_func']  = None # A function to call to stop the sim partway through
-    pars['window']     = 7 # Integration window for doubling time and R_eff
-
-    # Disease states and other states
-    pars['possible_states'] = ['susceptible',
-                               'exposed', 'infectious', 'symptomatic', 'severe', 'critical', # Gradations of exposure and disease
-                               'tested', 'diagnosed',                                        # Testing
-                               'recovered', 'dead',                                          # Possible resolutions
-                               'known_contact', 'quarantined']                               # Whether they know a confirmed case, whether they're quarantined
-
-    # Basic disease transmission
-    pars['beta']         = 0.015 # Beta per symptomatic contact; absolute
-    pars['contacts']     = {'h': 4,   's': 10,  'w': 10,  'c': 20} # Number of contacts per person per day, estimated
-    pars['beta_layers']  = {'h': 1.7, 's': 0.8, 'w': 0.8, 'c': 0.3} # Per-population beta weights; relative
-=======
 
     # Disease transmission parameters
     pars['n_imports']    = 0 # Average daily number of imported cases (actual number is drawn from Poisson distribution)
@@ -62,7 +44,6 @@ def make_pars(set_prognoses=False, prog_by_age=True, use_layers=False, **kwargs)
     pars['use_layers']   = use_layers # Whether or not to use different contact layers
     pars['contacts']     = None # The number of contacts per layer
     pars['beta_layers']  = None # Transmissibility per layer
->>>>>>> develop
 
     # Efficacy of protection measures
     pars['asymp_factor']        = 0.8 # Multiply beta by this factor for asymptomatic cases
