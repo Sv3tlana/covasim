@@ -7,11 +7,12 @@ import sciris as sc
 import covasim as cv
 
 do_plot   = 1
-do_show   = 0
+do_show   = 1
 do_save   = 0
 debug     = 1
 keep_sims = 0
-fig_path  = [f'results/testing_scen_{i}.png' for i in range(3)]
+fig_paths = [f'results/testing_scen_{i}.png' for i in range(3)]
+
 
 def test_interventions(do_plot=False, do_show=True, do_save=False, fig_path=None):
     sc.heading('Test of testing interventions')
@@ -24,11 +25,12 @@ def test_interventions(do_plot=False, do_show=True, do_save=False, fig_path=None
     n_runs = 3
     verbose = 1
     base_pars = {
-      'n': 1000
+      'pop_size': 1000,
+      'use_layers': True,
       }
 
     base_sim = cv.Sim(base_pars) # create sim object
-    n_people = base_sim['n']
+    n_people = base_sim['pop_size']
     npts = base_sim.npts
 
     # Define overall testing assumptions
@@ -61,7 +63,7 @@ def test_interventions(do_plot=False, do_show=True, do_save=False, fig_path=None
         'floating': {
             'name': 'Test with constant probability based on symptoms',
             'pars': {
-                'interventions': cv.test_prob(symptomatic_prob=max_optimistic_testing, asymptomatic_prob=0.0, trace_prob=0.9)
+                'interventions': cv.test_prob(symptomatic_prob=max_optimistic_testing, asymptomatic_prob=0.0)
                 }
         },
         'historical': {
@@ -75,7 +77,7 @@ def test_interventions(do_plot=False, do_show=True, do_save=False, fig_path=None
             'pars': {
                 'interventions': cv.sequence(days=[10, 51], interventions=[
                     cv.test_historical(n_tests=[100] * npts, n_positive=[1] * npts),
-                    cv.test_prob(symptomatic_prob=0.2, asymptomatic_prob=0.002, trace_prob=0.9),
+                    cv.test_prob(symptomatic_prob=0.2, asymptomatic_prob=0.002),
                 ])
             }
         },
@@ -103,11 +105,12 @@ def test_turnaround(do_plot=False, do_show=True, do_save=False, fig_path=None):
     n_runs = 3
     verbose = 1
     base_pars = {
-      'n': 20000
+      'pop_size': 5000,
+      'use_layers': True,
       }
 
     base_sim = cv.Sim(base_pars) # create sim object
-    n_people = base_sim['n']
+    n_people = base_sim['pop_size']
     npts = base_sim.npts
 
     # Define overall testing assumptions
@@ -116,24 +119,12 @@ def test_turnaround(do_plot=False, do_show=True, do_save=False, fig_path=None):
 
     # Define the scenarios
     scenarios = {
-        '7dayturnaround': {
-          'name':'Symptomatic testing with 7 days to get results',
+        f'{d}dayturnaround': {
+            'name':f'Symptomatic testing with {d} days to get results',
             'pars': {
-                'interventions': cv.test_num(daily_tests=daily_tests, test_delay=7)
-              }
-          },
-        '3dayturnaround': {
-          'name':'Symptomatic testing with 3 days to get results',
-          'pars': {
-              'interventions': cv.test_num(daily_tests=daily_tests, test_delay=3)
-              }
-          },
-        '0dayturnaround': {
-            'name': 'Symptomatic testing with immediate results',
-            'pars': {
-                'interventions': cv.test_num(daily_tests=daily_tests, test_delay=0)
+                'interventions': cv.test_num(daily_tests=daily_tests, test_delay=d)
             }
-        },
+        } for d in range(1, 7+1)
     }
 
     metapars = {'n_runs': n_runs}
@@ -147,7 +138,6 @@ def test_turnaround(do_plot=False, do_show=True, do_save=False, fig_path=None):
     return scens
 
 
-
 def test_tracedelay(do_plot=False, do_show=True, do_save=False, fig_path=None):
     sc.heading('Test impact of reducing delay time for finding contacts of positives')
 
@@ -158,14 +148,15 @@ def test_tracedelay(do_plot=False, do_show=True, do_save=False, fig_path=None):
     n_runs = 3
     verbose = 1
     base_pars = {
-      'n': 20000
+      'pop_size': 5000,
+      'use_layers': True,
       }
 
     base_sim = cv.Sim(base_pars) # create sim object
     base_sim['n_days'] = 50
     #base_sim['contacts'] = {'h': 4,   's': 10,  'w': 10,  'c': 0} # Turn off community contacts - not working
     #base_sim['beta'] = 0.02 # Increase beta
-    n_people = base_sim['n']
+    n_people = base_sim['pop_size']
     npts = base_sim.npts
 
 
@@ -242,9 +233,9 @@ def test_tracedelay(do_plot=False, do_show=True, do_save=False, fig_path=None):
 if __name__ == '__main__':
     sc.tic()
 
-#    scens1 = test_interventions(do_plot=do_plot, do_save=do_save, do_show=do_show, fig_path=fig_path[0])
-#    scens2 = test_turnaround(do_plot=do_plot, do_save=do_save, do_show=do_show, fig_path=fig_path[1])
-    scens3 = test_tracedelay(do_plot=do_plot, do_save=do_save, do_show=do_show, fig_path=fig_path[2])
+    scens1 = test_interventions(do_plot=do_plot, do_save=do_save, do_show=do_show, fig_path=fig_paths[0])
+    scens2 = test_turnaround(do_plot=do_plot, do_save=do_save, do_show=do_show, fig_path=fig_paths[1])
+    scens3 = test_tracedelay(do_plot=do_plot, do_save=do_save, do_show=do_show, fig_path=fig_paths[2])
 
     sc.toc()
 
