@@ -372,9 +372,9 @@ class Sim(cvbase.BaseSim):
                                     target_person.check_quarantined(t, quarantine_period) # ... because if so, they might be isolating
 
                                     if target_person.quarantined:
-                                        infect_this_person = not cvu.bt(quar_acq_factor)  # ... and we don't infect them if they're isolating
+                                        infect_this_person = not cvu.bt(quar_acq_factor)  # ... and we don't infect them if they're isolating...
 
-                                    if infect_this_person: # We've checked all the conditions are we're going to infect them
+                                    if infect_this_person: # ... now finally we've checked all the conditions, so we're going to infect them
                                         new_infections += target_person.infect(t, bed_constraint, source=person) # Actually infect them
                                         sc.printv(f'        Person {person.uid} infected person {target_person.uid}!', 2, verbose)
 

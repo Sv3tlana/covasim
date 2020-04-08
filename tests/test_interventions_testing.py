@@ -3,12 +3,14 @@ Testing the effect of testing interventions in Covasim
 '''
 
 #%% Imports and settings
+import matplotlib
+matplotlib.use('Agg')
 import sciris as sc
 import covasim as cv
 
 do_plot   = 1
-do_show   = 1
-do_save   = 0
+do_show   = 0
+do_save   = 1
 debug     = 1
 keep_sims = 0
 fig_paths = [f'results/testing_scen_{i}.png' for i in range(3)]
@@ -148,7 +150,7 @@ def test_tracedelay(do_plot=False, do_show=True, do_save=False, fig_path=None):
     n_runs = 3
     verbose = 1
     base_pars = {
-      'pop_size': 5000,
+      'pop_size': 20000,
       'use_layers': True,
       }
 
@@ -174,7 +176,8 @@ def test_tracedelay(do_plot=False, do_show=True, do_save=False, fig_path=None):
                 'quarantine_period': 7,
                 'interventions': [
                     cv.test_num(daily_tests=daily_tests),
-                    cv.contact_tracing(trace_probs = {'h': 1, 's': 0.8, 'w': 0.5, 'c': 0.0},
+                    cv.contact_tracing(start_day=21,
+                                       trace_probs = {'h': 1, 's': 0.8, 'w': 0.5, 'c': 0.0},
                                        trace_time  = {'h': 0, 's': 7,   'w': 7,   'c': 0})]
             }
         },
@@ -186,7 +189,8 @@ def test_tracedelay(do_plot=False, do_show=True, do_save=False, fig_path=None):
                 'quarantine_period': 10,
                 'interventions': [
                     cv.test_num(daily_tests=daily_tests),
-                    cv.contact_tracing(trace_probs = {'h': 1, 's': 0.8, 'w': 0.5, 'c': 0.1},
+                    cv.contact_tracing(start_day=21,
+                                       trace_probs = {'h': 1, 's': 0.8, 'w': 0.5, 'c': 0.1},
                                        trace_time  = {'h': 0,  's': 3,  'w': 3,   'c': 8})]
             }
         },
@@ -198,7 +202,8 @@ def test_tracedelay(do_plot=False, do_show=True, do_save=False, fig_path=None):
                 'quarantine_period': 14,
                 'interventions': [
                     cv.test_num(daily_tests=daily_tests),
-                    cv.contact_tracing(trace_probs = {'h': 1, 's': 0.8, 'w': 0.8, 'c': 0.2},
+                    cv.contact_tracing(start_day=21,
+                                       trace_probs = {'h': 1, 's': 0.8, 'w': 0.8, 'c': 0.2},
                                        trace_time  = {'h': 0, 's': 1,   'w': 1,   'c': 5})]
             }
         },
@@ -210,7 +215,8 @@ def test_tracedelay(do_plot=False, do_show=True, do_save=False, fig_path=None):
                 'quarantine_period': 21,
                 'interventions': [
                     cv.test_num(daily_tests=daily_tests),
-                    cv.contact_tracing(trace_probs = {'h': 1, 's': 1, 'w': 1, 'c': 1},
+                    cv.contact_tracing(start_day=21,
+                                       trace_probs = {'h': 1, 's': 1, 'w': 1, 'c': 1},
                                        trace_time  = {'h': 0, 's': 0, 'w': 0, 'c': 0})]
             }
         },
@@ -233,8 +239,8 @@ def test_tracedelay(do_plot=False, do_show=True, do_save=False, fig_path=None):
 if __name__ == '__main__':
     sc.tic()
 
-    scens1 = test_interventions(do_plot=do_plot, do_save=do_save, do_show=do_show, fig_path=fig_paths[0])
-    scens2 = test_turnaround(do_plot=do_plot, do_save=do_save, do_show=do_show, fig_path=fig_paths[1])
+#    scens1 = test_interventions(do_plot=do_plot, do_save=do_save, do_show=do_show, fig_path=fig_paths[0])
+#    scens2 = test_turnaround(do_plot=do_plot, do_save=do_save, do_show=do_show, fig_path=fig_paths[1])
     scens3 = test_tracedelay(do_plot=do_plot, do_save=do_save, do_show=do_show, fig_path=fig_paths[2])
 
     sc.toc()
