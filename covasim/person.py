@@ -35,6 +35,7 @@ class Person(sc.prettyobj):
         self.recovered     = False
         self.dead          = False
         self.known_contact = False
+        self.quarantined   = False
 
         # Define dates
         self.date_exposed       = None
@@ -47,6 +48,7 @@ class Person(sc.prettyobj):
         self.date_recovered     = None
         self.date_dead          = None
         self.date_known_contact = None
+        self.date_quarantined   = False
 
         # Keep track of durations
         self.dur_exp2inf  = None # Duration from exposure to infectiousness
@@ -207,6 +209,14 @@ class Person(sc.prettyobj):
             return 0
 
 
+    def quarantine(self, t):
+        '''
+        Quarantine a person starting on day t
+        '''
+        self.quarantined = True
+        self.date_quarantined = t
+        return
+
     # Methods to check a person's status
     def check_symptomatic(self, t):
         ''' Check for new progressions to symptomatic '''
@@ -272,3 +282,18 @@ class Person(sc.prettyobj):
             return 0
 
 
+    def check_known_contact(self, t):
+        ''' Check for whether someone has been contacted by a positive'''
+        if not self.known_contact and self.date_known_contact is not None and t >= self.date_known_contact:
+            self.known_contact = True
+            self.quarantine(t)
+        return
+
+
+    def check_quarantined(self, t, quarantine_period):
+        ''' Check for whether someone is isolating/quarantined'''
+        if self.date_quarantined is not None and t >= self.date_quarantined and t <= self.date_quarantined + quarantine_period:
+            self.quarantined = True
+        else:
+            self.quarantined = False
+        return
