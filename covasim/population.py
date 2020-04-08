@@ -361,7 +361,7 @@ class RandomContactLayer(ContactLayer):
 
         Args:
             name:
-            beta: Transmission probability per contact (absolute)
+            beta: Transmission probability per contact (relative)
             max_n: Number of people available
             n: Number of contacts per person
 
@@ -373,3 +373,43 @@ class RandomContactLayer(ContactLayer):
 
     def get_contacts(self, person, sim) -> list:
         return cvu.choose(max_n=self.max_n, n=self.n)
+
+
+class EventContactLayer(ContactLayer):
+    def __init__(self, name: str, people: dict, events: dict, beta: float = 1.0) -> None:
+        """
+        Random collection of people at specified events
+
+        Suitable for modelling (potentially several) one-off random event interactions
+
+        Example usage:
+
+        To make a layer representing two events on days 5 and 15 where there are fewer people
+        at the event on day 15:
+
+        >>> p = cv.Population.random(pars)
+        >>> p.contact_layers['Sports'] = cv.EventContactLayer('Sports',p.people,{5:500, 15:250})
+
+        Args:
+            name: The name of the layer
+            people: People dictionary for the population containing this layer (from Population.people)
+            events: Dict storing {t:n} where `t` is the timestep the event occurs and `n` is the number of people at that event
+            beta: Transmission probability per contact (relative)
+
+        """
+
+        super().__init__(name, beta, traceable=False)  # nb. cannot trace random contacts in this layer - this is a likely candidate for being partially traceable though
+        self.max_n = len(people)  #: Total number of people/indices to select from
+        self.events = {}  #: People attending each event
+
+        for t, n in events.items():
+            attendees = cvu.choose(max_n=self.max_n, n=min(self.max_n, n))
+            self.events[t] = set(attendees)
+
+        self._indices = {p.uid:i for i,p in enumerate(people.values())} # Map UID to index
+
+    def get_contacts(self, person, sim) -> list:
+        person_index = self._indices[person.uid]
+        if sim.t in self.events:
+            if person_index in self.events[sim.t]:
+                return list(self.events[sim.t]-{person_index}) # Return everyone else at the event except for this person
