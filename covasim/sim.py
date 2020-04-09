@@ -271,8 +271,8 @@ class Sim(cvbase.BaseSim):
         beta                = self['beta']
         asymp_factor        = self['asymp_factor']
         diag_factor         = self['diag_factor']
-        quar_trans_factor   = self['quar_trans_factor']
-        quar_acq_factor     = self['quar_acq_factor']
+#        quar_trans_factor   = self['quar_trans_factor']
+#        quar_acq_factor     = self['quar_acq_factor']
         quarantine_period   = self['quarantine_period']
         beta_layers         = self['beta_layers']
         n_beds              = self['n_beds']
@@ -340,14 +340,17 @@ class Sim(cvbase.BaseSim):
                         bed_constraint = True
 
                     # If they're quarantined, this affects their attack rate
-                    person.check_known_contact(t)
-                    person.check_quarantined(t, quarantine_period)
+#                    person.check_known_contact(t)
+#                    person.check_quarantined(t, quarantine_period)
+
+#                    if not person.quarantined and person.date_quarantined is not None:
+#                        sc.printv(f'        Person {person.uid} started quarantine on day {person.date_quarantined}, out on day {t}!!', 2, verbose)
 
                     # Calculate transmission risk based on whether they're asymptomatic/diagnosed/have been isolated
                     thisbeta = beta * \
                                (asymp_factor if not person.symptomatic else 1.) * \
-                               (diag_factor if person.diagnosed else 1.) * \
-                               (quar_trans_factor if person.quarantined else 1.)
+                               (diag_factor if person.diagnosed else 1.) #* \
+#                               (quar_trans_factor if person.quarantined else 1.)
 
                     # Set community contacts
                     person_contacts = person.contacts
@@ -368,11 +371,11 @@ class Sim(cvbase.BaseSim):
 
                                 if target_person.susceptible: # Skip people who are not susceptible and see whether we will infect this person
                                     infect_this_person = True  # By default, infect them...
-                                    target_person.check_known_contact(t) # ... but first we check if they've had known contact with a positive...
-                                    target_person.check_quarantined(t, quarantine_period) # ... because if so, they might be isolating
+#                                    target_person.check_known_contact(t) # ... but first we check if they've had known contact with a positive...
+#                                    target_person.check_quarantined(t, quarantine_period) # ... because if so, they might be isolating
 
-                                    if target_person.quarantined:
-                                        infect_this_person = not cvu.bt(quar_acq_factor)  # ... and we don't infect them if they're isolating...
+#                                    if target_person.quarantined:
+#                                        infect_this_person = not cvu.bt(quar_acq_factor)  # ... and we don't infect them if they're isolating...
 
                                     if infect_this_person: # ... now finally we've checked all the conditions, so we're going to infect them
                                         new_infections += target_person.infect(t, bed_constraint, source=person) # Actually infect them

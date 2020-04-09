@@ -38,9 +38,6 @@ def make_pars(set_prognoses=False, prog_by_age=True, use_layers=False, **kwargs)
     # Disease transmission parameters
     pars['n_imports']    = 0 # Average daily number of imported cases (actual number is drawn from Poisson distribution)
     pars['beta']         = 0.015 # Beta per symptomatic contact; absolute
-    pars['asymp_factor'] = 0.8 # Multiply beta by this factor for asymptomatic cases
-    pars['diag_factor']  = 0.0 # Multiply beta by this factor for diganosed cases -- baseline assumes complete isolation
-    pars['cont_factor']  = 1.0 # Multiply beta by this factor for people who've been in contact with known positives  -- baseline assumes no isolation
     pars['use_layers']   = use_layers # Whether or not to use different contact layers
     pars['contacts']     = None # The number of contacts per layer
     pars['beta_layers']  = None # Transmissibility per layer

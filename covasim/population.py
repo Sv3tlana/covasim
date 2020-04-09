@@ -212,7 +212,6 @@ def make_random_contacts(sim):
     contacts_list = []
     contacts = sc.dcp(sim['contacts'])
     contact_keys = list(contacts.keys())
-    contacts.pop('c', None) # Remove community
     for p in range(pop_size):
         contact_dict = {}
         for key in contact_keys:

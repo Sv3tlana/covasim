@@ -13,7 +13,7 @@ do_show   = 0
 do_save   = 1
 debug     = 1
 keep_sims = 0
-fig_paths = [f'results/testing_scen_{i}.png' for i in range(3)]
+fig_paths = [f'results/testing_scen_{i}.png' for i in range(4)]
 
 
 def test_interventions(do_plot=False, do_show=True, do_save=False, fig_path=None):
@@ -59,7 +59,7 @@ def test_interventions(do_plot=False, do_show=True, do_save=False, fig_path=None
           'name':'Assuming South Korea testing levels of 0.02% daily (with contact tracing); isolate positives',
           'pars': {
               'interventions': [cv.test_num(daily_tests=optimistic_daily_tests),
-                                cv.dynamic_pars({'cont_factor':{'days':20, 'vals':0.1}})] # This means that people who've been in contact with known positives isolate with 90% effectiveness
+                                cv.dynamic_pars({'quar_trans_factor':{'days':20, 'vals':0.1}})] # This means that people who've been in contact with known positives isolate with 90% effectiveness
               }
           },
         'floating': {
@@ -140,10 +140,61 @@ def test_turnaround(do_plot=False, do_show=True, do_save=False, fig_path=None):
     return scens
 
 
+def test_sanitycheck_tracedelay(do_plot=False, do_show=True, do_save=False, fig_path=None):
+    sc.heading('Sanity check for contact tracing: removing the intervention vs setting effects to zero')
+
+    sc.tic()
+
+    n_runs = 3
+    verbose = 1
+    base_pars = {
+      'pop_size': 5000,
+      'use_layers': True,
+      }
+
+    base_sim = cv.Sim(base_pars) # create sim object
+    n_people = base_sim['pop_size']
+    npts = base_sim.npts
+
+    # Define overall testing assumptions
+    testing_prop = 0.01 # Assumes we could test 1% of the population daily
+    daily_tests = [testing_prop*n_people]*npts # Number of daily tests
+
+    # Define the scenarios
+    scenarios = {
+        'none': {
+            'name': 'No contact tracing',
+            'pars': {
+                'interventions': [
+                    cv.test_num(daily_tests=daily_tests, trace_test=1.0)]
+            }
+        },
+        'ineffectivetracing': {
+            'name': "Contact tracing intervention in place, but it doesn't work",
+            'pars': {
+                'quar_trans_factor': 1.,
+#                'quar_acq_factor': 0,
+                'interventions': [
+                    cv.test_num(daily_tests=daily_tests, trace_test=1.0),
+                    cv.contact_tracing(trace_probs = {'h': 0, 's': 0, 'w': 0, 'c': 0},
+                                       trace_time  = {'h': 0, 's': 7,   'w': 7,   'c': 10})]
+            }
+        },
+    }
+
+    metapars = {'n_runs': n_runs}
+
+    scens = cv.Scenarios(sim=base_sim, metapars=metapars, scenarios=scenarios)
+    scens.run(verbose=verbose, debug=debug)
+
+    if do_plot:
+        scens.plot(do_save=do_save, do_show=do_show, fig_path=fig_path)
+
+    return scens
+
+
 def test_tracedelay(do_plot=False, do_show=True, do_save=False, fig_path=None):
     sc.heading('Test impact of reducing delay time for finding contacts of positives')
-
-    sc.heading('Setting up...')
 
     sc.tic()
 
@@ -155,37 +206,46 @@ def test_tracedelay(do_plot=False, do_show=True, do_save=False, fig_path=None):
       }
 
     base_sim = cv.Sim(base_pars) # create sim object
-    base_sim['n_days'] = 50
-    #base_sim['contacts'] = {'h': 4,   's': 10,  'w': 10,  'c': 0} # Turn off community contacts - not working
-    #base_sim['beta'] = 0.02 # Increase beta
     n_people = base_sim['pop_size']
     npts = base_sim.npts
 
-
     # Define overall testing assumptions
-    testing_prop = 0.1 # Assumes we could test 10% of the population daily (way too optimistic!!)
+    testing_prop = 0.01 # Assumes we could test 1% of the population daily
     daily_tests = [testing_prop*n_people]*npts # Number of daily tests
 
     # Define the scenarios
     scenarios = {
-        'lowtrace': {
-            'name': '10% daily testing; poor contact tracing, 50% of contacts self-isolate for 7 days',
+        'ineffectivetracing': {
+            'name': "Very poor contact tracing, 10% of contacts isolate for 7 days",
             'pars': {
-                'quar_trans_factor': 0.5,
-                'quar_acq_factor': 0,# 1.,
+                'quar_trans_factor': 1.,
+                'quar_acq_factor':  0.,
                 'quarantine_period': 7,
                 'interventions': [
                     cv.test_num(daily_tests=daily_tests),
                     cv.contact_tracing(start_day=21,
-                                       trace_probs = {'h': 1, 's': 0.8, 'w': 0.5, 'c': 0.0},
-                                       trace_time  = {'h': 0, 's': 7,   'w': 7,   'c': 0})]
+                                       trace_probs = {'h': 1, 's': 0.8, 'w': 0.5, 'c': 0.1},
+                                       trace_time  = {'h': 0, 's': 7,   'w': 7,   'c': 10})]
+            }
+        },
+        'lowtrace': {
+            'name': 'Poor contact tracing, 50% of contacts self-isolate for 7 days',
+            'pars': {
+                'quar_trans_factor': 0.5,
+                'quar_acq_factor':  0.5,
+                'quarantine_period': 7,
+                'interventions': [
+                    cv.test_num(daily_tests=daily_tests),
+                    cv.contact_tracing(start_day=21,
+                                       trace_probs = {'h': 1, 's': 0.8, 'w': 0.5, 'c': 0.1},
+                                       trace_time  = {'h': 0, 's': 7,   'w': 7,   'c': 10})]
             }
         },
         'modtrace': {
-            'name': '10% daily testing; moderate contact tracing, 75% of contacts self-isolate for 10 days',
+            'name': 'Moderate contact tracing, 75% of contacts self-isolate for 10 days',
             'pars': {
                 'quar_trans_factor': 0.25,
-                'quar_acq_factor': 0,#0.75,
+                'quar_acq_factor': 0.75,
                 'quarantine_period': 10,
                 'interventions': [
                     cv.test_num(daily_tests=daily_tests),
@@ -195,10 +255,10 @@ def test_tracedelay(do_plot=False, do_show=True, do_save=False, fig_path=None):
             }
         },
         'hightrace': {
-            'name': '10% daily testing; fast contact tracing, 90% of contacts self-isolate for 14 days',
+            'name': 'Fast contact tracing, 90% of contacts self-isolate for 14 days',
             'pars': {
                 'quar_trans_factor': 0.1,
-                'quar_acq_factor': 0,#0.9,
+                'quar_acq_factor': 0.9,
                 'quarantine_period': 14,
                 'interventions': [
                     cv.test_num(daily_tests=daily_tests),
@@ -208,10 +268,10 @@ def test_tracedelay(do_plot=False, do_show=True, do_save=False, fig_path=None):
             }
         },
         'crazy': {
-            'name': '10% daily testing; same-day contact tracing, 100% of contacts self-isolate for 21 days',
+            'name': 'Same-day contact tracing, 100% of contacts self-isolate for 21 days',
             'pars': {
                 'quar_trans_factor': 0,
-                'quar_acq_factor': 0,#1,
+                'quar_acq_factor': 1,
                 'quarantine_period': 21,
                 'interventions': [
                     cv.test_num(daily_tests=daily_tests),
@@ -239,9 +299,10 @@ def test_tracedelay(do_plot=False, do_show=True, do_save=False, fig_path=None):
 if __name__ == '__main__':
     sc.tic()
 
-    scens1 = test_interventions(do_plot=do_plot, do_save=do_save, do_show=do_show, fig_path=fig_paths[0])
-    scens2 = test_turnaround(do_plot=do_plot, do_save=do_save, do_show=do_show, fig_path=fig_paths[1])
-    scens3 = test_tracedelay(do_plot=do_plot, do_save=do_save, do_show=do_show, fig_path=fig_paths[2])
+#    scens1 = test_interventions(do_plot=do_plot, do_save=do_save, do_show=do_show, fig_path=fig_paths[0])
+#    scens2 = test_turnaround(do_plot=do_plot, do_save=do_save, do_show=do_show, fig_path=fig_paths[1])
+    scens3 = test_sanitycheck_tracedelay(do_plot=do_plot, do_save=do_save, do_show=do_show, fig_path=fig_paths[2])
+#    scens4 = test_tracedelay(do_plot=do_plot, do_save=do_save, do_show=do_show, fig_path=fig_paths[3])
 
     sc.toc()
 

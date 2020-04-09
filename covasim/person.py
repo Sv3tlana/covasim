@@ -48,7 +48,7 @@ class Person(sc.prettyobj):
         self.date_recovered     = None
         self.date_dead          = None
         self.date_known_contact = None
-        self.date_quarantined   = False
+        self.date_quarantined   = None
 
         # Keep track of durations
         self.dur_exp2inf  = None # Duration from exposure to infectiousness
@@ -162,6 +162,12 @@ class Person(sc.prettyobj):
         if ckey in self.contacts:
             this_trace_prob = trace_probs[ckey]
             new_contact_keys = cvu.bf(this_trace_prob, self.contacts[ckey])
+            if len(new_contact_keys):
+                import traceback;
+                traceback.print_exc();
+                import pdb;
+                pdb.set_trace()
+
             self.dyn_cont_ppl.update({nck:trace_time[ckey] for nck in new_contact_keys})
         return
 
@@ -172,7 +178,7 @@ class Person(sc.prettyobj):
         '''
         contactable_ppl = {}  # Store people that are contactable and how long it takes to contact them
         for ckey in self.contacts.keys():
-            if ckey != 'c': # Don't trace community contacts - it's too hard, because they change every timestep
+            if ckey != 'c': # Don't trace community contacts
                 this_trace_prob = trace_probs[ckey]
                 new_contact_keys = cvu.bf(this_trace_prob, self.contacts[ckey])
                 contactable_ppl.update({nck: trace_time[ckey] for nck in new_contact_keys})
@@ -292,7 +298,7 @@ class Person(sc.prettyobj):
 
     def check_quarantined(self, t, quarantine_period):
         ''' Check for whether someone is isolating/quarantined'''
-        if self.date_quarantined is not None and t >= self.date_quarantined and t <= self.date_quarantined + quarantine_period:
+        if self.date_quarantined is not None and t >= self.date_quarantined and t < self.date_quarantined + quarantine_period:
             self.quarantined = True
         else:
             self.quarantined = False
