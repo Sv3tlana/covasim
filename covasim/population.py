@@ -216,8 +216,9 @@ def make_random_contacts(sim):
     for p in range(pop_size):
         contact_dict = {}
         for key in contact_keys:
-            n_contacts = cvu.pt(contacts[key]) # Draw the number of Poisson contacts for this person
-            contact_dict[key] = cvu.choose(max_n=pop_size, n=n_contacts) # Choose people at random
+            if key != 'c': # Added later
+                n_contacts = cvu.pt(contacts[key]) # Draw the number of Poisson contacts for this person
+                contact_dict[key] = cvu.choose(max_n=pop_size, n=n_contacts) # Choose people at random
         contacts_list.append(contact_dict)
     return contacts_list, contact_keys
 
