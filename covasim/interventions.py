@@ -301,18 +301,18 @@ class contact_tracing(Intervention):
             # A sample of community contacts is appended to person.dyn_cont_ppl on each step
             person.trace_dynamic_contacts(self.trace_probs, self.trace_time)
 
-#            if person.date_diagnosed is not None and person.date_diagnosed == t-1:
+            if person.date_diagnosed is not None and person.date_diagnosed == t-1:
                 # This person was just diagnosed: time to trace their (static) contacts
- #               contactable_ppl = person.trace_static_contacts(self.trace_probs, self.trace_time)
-#                contactable_ppl.update(person.dyn_cont_ppl)
+                contactable_ppl = person.trace_static_contacts(self.trace_probs, self.trace_time)
+                contactable_ppl.update(person.dyn_cont_ppl)
 
                 # Loop over people who get contacted
-#                for contact_ind, contact_time in contactable_ppl.items():
-#                    target_person = sim.people[contact_ind]
-#                    if target_person.date_known_contact is None:
-#                        target_person.date_known_contact = t + contact_time
-#                    else:
-#                        target_person.date_known_contact = min(target_person.date_known_contact, t + contact_time)
+                for contact_ind, contact_time in contactable_ppl.items():
+                    target_person = sim.people[contact_ind]
+                    if target_person.date_known_contact is None:
+                        target_person.date_known_contact = t + contact_time
+                    else:
+                        target_person.date_known_contact = min(target_person.date_known_contact, t + contact_time)
 
         return
 

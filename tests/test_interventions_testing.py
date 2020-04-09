@@ -3,14 +3,12 @@ Testing the effect of testing interventions in Covasim
 '''
 
 #%% Imports and settings
-import matplotlib
-matplotlib.use('Agg')
 import sciris as sc
 import covasim as cv
 
 do_plot   = 1
-do_show   = 0
-do_save   = 1
+do_show   = 1
+do_save   = 0
 debug     = 1
 keep_sims = 0
 fig_paths = [f'results/testing_scen_{i}.png' for i in range(4)]
@@ -185,7 +183,7 @@ def test_sanitycheck_tracedelay(do_plot=False, do_show=True, do_save=False, fig_
     metapars = {'n_runs': n_runs}
 
     scens = cv.Scenarios(sim=base_sim, metapars=metapars, scenarios=scenarios)
-    scens.run(verbose=verbose, debug=debug)
+    scens.run(verbose=verbose, debug=debug, keep_people=True)
 
     if do_plot:
         scens.plot(do_save=do_save, do_show=do_show, fig_path=fig_path)

@@ -162,12 +162,6 @@ class Person(sc.prettyobj):
         if ckey in self.contacts:
             this_trace_prob = trace_probs[ckey]
             new_contact_keys = cvu.bf(this_trace_prob, self.contacts[ckey])
-            if len(new_contact_keys):
-                import traceback;
-                traceback.print_exc();
-                import pdb;
-                pdb.set_trace()
-
             self.dyn_cont_ppl.update({nck:trace_time[ckey] for nck in new_contact_keys})
         return
 
